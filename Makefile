@@ -5,7 +5,7 @@
 
 # Compiler options here.
 ifeq ($(USE_OPT),)
-  USE_OPT = -O3 -ggdb -fomit-frame-pointer -falign-functions=16
+  USE_OPT = -O3 -ggdb -fomit-frame-pointer -falign-functions=16 -fno-stack-protector
 endif
 
 # C specific options here (added to USE_OPT).
@@ -25,7 +25,7 @@ endif
 
 # Linker extra options here.
 ifeq ($(USE_LDOPT),)
-  USE_LDOPT = -lm
+  USE_LDOPT =
 endif
 
 # Enable this if you want link time optimizations (LTO).
@@ -66,12 +66,12 @@ endif
 
 # Enables the use of FPU (no, softfp, hard).
 ifeq ($(USE_FPU),)
-  USE_FPU = softfp
+  USE_FPU = no
 endif
 
 # FPU-related options.
 ifeq ($(USE_FPU_OPT),)
-  USE_FPU_OPT = -mfloat-abi=$(USE_FPU) -mfpu=fpv4-sp-d16
+  USE_FPU_OPT = #-mfloat-abi=$(USE_FPU) -mfpu=fpv4-sp-d16
 endif
 
 #
@@ -89,7 +89,7 @@ PROJECT = ch
 MCU  = cortex-m0
 
 # Imported source files and paths.
-CHIBIOS  := ../..
+CHIBIOS  := ../../ChibiOS
 CONFDIR  := ./cfg
 BUILDDIR := ./build
 DEPDIR   := ./.dep
@@ -127,14 +127,15 @@ CPPSRC = $(ALLCPPSRC) \
          main.cpp
 
 # List ASM source files here.
-ASMSRC = $(ALLASMSRC)
+ASMSRC = $(ALLASMSRC) \
+	  qfplib-m0-full-20240105/qfplib-m0-full.s
 
 # List ASM with preprocessor source files here.
 ASMXSRC = $(ALLXASMSRC)
 
 # Inclusion directories.
 INCDIR = $(CONFDIR) $(ALLINC) \
-         fpm/include
+	 qfplib-m0-full-20240105
 
 # Define C warning options here.
 CWARN = -Wall -Wextra -Wundef -Wstrict-prototypes

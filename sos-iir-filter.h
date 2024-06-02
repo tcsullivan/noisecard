@@ -26,11 +26,50 @@
 #include <ranges>
 #include <utility>
 
-#include <cmath>
-namespace fpm = std;
-using sos_t = float;
-//#include <fpm/math.hpp>
-//using sos_t = fpm::fixed_16_16;
+extern "C" {
+#include <qfplib-m0-full.h>
+}
+
+float qfp_fpow(float b, float e)
+{
+    return qfp_fexp(e * qfp_fln(b));
+}
+
+float qfp_flog10(float x)
+{
+    return qfp_fln(x) / qfp_fln(10);
+}
+
+struct sos_t
+{
+    float v;
+
+    constexpr sos_t(float v_ = 0.f): v(v_) {}
+
+    sos_t operator+(const sos_t& o) const noexcept {
+        return qfp_fadd(v, o.v);
+    }
+
+    sos_t operator-(const sos_t& o) const noexcept {
+        return qfp_fsub(v, o.v);
+    }
+
+    sos_t operator*(const sos_t& o) const noexcept {
+        return qfp_fmul(v, o.v);
+    }
+
+    sos_t operator/(const sos_t& o) const noexcept {
+        return qfp_fdiv(v, o.v);
+    }
+
+    sos_t& operator+=(const sos_t& o) noexcept {
+        return (*this = *this + o);
+    }
+
+    operator float() const noexcept {
+        return v;
+    }
+};
 
 struct SOS_Coefficients {
   sos_t b1;
@@ -60,8 +99,7 @@ struct SOS_IIR_Filter {
     std::copy(_sos, _sos + N, sos.begin());
   }
 
-  void filter(auto samples) {
-    // Apply all but last Second-Order-Section
+  void filter(auto samples, std::size_t n = N) {
     for ([[maybe_unused]] auto _ : std::views::zip_transform(
         [](auto samps, const auto& coeffs, auto& ww) {
             // Assumes a0 and b0 coefficients are one (1.0)
@@ -72,13 +110,25 @@ struct SOS_IIR_Filter {
             }
             return 0;
         },
-        std::views::repeat(samples, N), sos, w)) {}
+        std::views::repeat(samples, n), sos, w)) {}
   }
 
   sos_t filter_sum_sqr(auto samples) {
-    filter(samples);
-    return std::ranges::fold_left(samples, sos_t(0),
-      [this](auto a, auto b) { return a + b * gain * b * gain; });
+    const auto& coeffs = sos.back();
+    auto& ww = w.back();
+    sos_t sum_sqr (0.f);
+
+    filter(samples, N - 1);
+
+    // Assumes a0 and b0 coefficients are one (1.0)
+    for (auto& s : samples) {
+      auto f6 = s + coeffs.a1 * ww.w0 + coeffs.a2 * ww.w1;
+      s = f6 + coeffs.b1 * ww.w0 + coeffs.b2 * ww.w1;
+      ww.w1 = std::exchange(ww.w0, f6);
+      sum_sqr += s * gain * s * gain;
+    }
+
+    return sum_sqr;
   }
 };
 
@@ -90,12 +140,12 @@ struct SOS_IIR_Filter {
 // A ~= [1.0, -1.993853, 0.993863]
 // With additional DC blocking component
 SOS_IIR_Filter SPH0645LM4H_B_RB = {
-  /* gain: */ sos_t(1.00123377961525),
+  /* gain: */ sos_t(1.00123377961525f),
   /* sos: */ { // Second-Order Sections {b1, b2, -a1, -a2}
-         { sos_t(-1.0), sos_t(0.0),
-           sos_t(+0.9992), sos_t(0) },  // DC blocker, a1 = -0.9992
-         { sos_t(-1.988897663539382), sos_t(+0.988928479008099),
-           sos_t(+1.993853376183491), sos_t(-0.993862821429572) } }
+         { sos_t(-1.0f), sos_t(0.0f),
+           sos_t(+0.9992f), sos_t(0.0f) },  // DC blocker, a1 = -0.9992
+         { sos_t(-1.988897663539382f), sos_t(+0.988928479008099f),
+           sos_t(+1.993853376183491f), sos_t(-0.993862821429572f) } }
 };
 
 //
@@ -104,14 +154,14 @@ SOS_IIR_Filter SPH0645LM4H_B_RB = {
 // B = [0.169994948147430, 0.280415310498794, -1.120574766348363, 0.131562559965936, 0.974153561246036, -0.282740857326553, -0.152810756202003]
 // A = [1.0, -2.12979364760736134, 0.42996125885751674, 1.62132698199721426, -0.96669962900852902, 0.00121015844426781, 0.04400300696788968]
 SOS_IIR_Filter A_weighting = {
-  /* gain: */ sos_t(0.169994948147430),
+  /* gain: */ sos_t(0.169994948147430f),
   /* sos: */ { // Second-Order Sections {b1, b2, -a1, -a2}
-         { sos_t(-2.00026996133106), sos_t(+1.00027056142719),
-           sos_t(-1.060868438509278), sos_t(-0.163987445885926) },
-         { sos_t(+4.35912384203144), sos_t(+3.09120265783884),
-           sos_t(+1.208419926363593), sos_t(-0.273166998428332) },
-         { sos_t(-0.70930303489759), sos_t(-0.29071868393580),
-           sos_t(+1.982242159753048), sos_t(-0.982298594928989) } }
+         { sos_t(-2.00026996133106f), sos_t(+1.00027056142719f),
+           sos_t(-1.060868438509278f), sos_t(-0.163987445885926f) },
+         { sos_t(+4.35912384203144f), sos_t(+3.09120265783884f),
+           sos_t(+1.208419926363593f), sos_t(-0.273166998428332f) },
+         { sos_t(-0.70930303489759f), sos_t(-0.29071868393580f),
+           sos_t(+1.982242159753048f), sos_t(-0.982298594928989f) } }
 };
 
 ////

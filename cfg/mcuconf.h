@@ -67,7 +67,7 @@
 #define STM32_PLLQ_VALUE                    4
 #define STM32_PLLR_VALUE                    4
 #define STM32_HPRE                          STM32_HPRE_DIV1
-#define STM32_PPRE                          STM32_PPRE_DIV1
+#define STM32_PPRE                          STM32_PPRE_DIV4
 #define STM32_MCOSEL                        STM32_MCOSEL_NOCLOCK
 #define STM32_MCOPRE                        STM32_MCOPRE_DIV1
 #define STM32_LSCOSEL                       STM32_LSCOSEL_NOCLOCK
@@ -79,7 +79,7 @@
 #define STM32_USART2SEL                     STM32_USART2SEL_PCLK
 #define STM32_LPUART1SEL                    STM32_LPUART1SEL_PCLK
 #define STM32_I2C1SEL                       STM32_I2C1SEL_PCLK
-#define STM32_I2S1SEL                       STM32_I2S1SEL_HSI16
+#define STM32_I2S1SEL                       STM32_I2S1SEL_SYSCLK
 #define STM32_LPTIM1SEL                     STM32_LPTIM1SEL_PCLK
 #define STM32_TIM1SEL                       STM32_TIM1SEL_TIMPCLK
 #define STM32_RNGSEL                        STM32_RNGSEL_HSI16
