@@ -1,2 +1,6 @@
 .*
+*.kicad_prl
+*.pretty
+*.step
 build
+hardware/production
