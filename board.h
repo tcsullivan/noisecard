@@ -14,11 +14,6 @@
     limitations under the License.
 */
 
-/*
- * This file has been automatically generated using ChibiStudio board
- * generator plugin. Do not edit manually.
- */
-
 #ifndef BOARD_H
 #define BOARD_H
 
