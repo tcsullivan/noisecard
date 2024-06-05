@@ -32,34 +32,36 @@ extern "C" {
 
 float qfp_fpow(float b, float e)
 {
-    return qfp_fexp(e * qfp_fln(b));
+    return qfp_fexp(qfp_fmul(e, qfp_fln(b)));
 }
 
 float qfp_flog10(float x)
 {
-    return qfp_fln(x) / qfp_fln(10);
+    static const auto ln10 = qfp_fln(10.f);
+    return qfp_fdiv(qfp_fln(x), ln10);
 }
 
-struct sos_t
+class sos_t
 {
     float v;
 
+public:
     constexpr sos_t(float v_ = 0.f): v(v_) {}
 
-    sos_t operator+(const sos_t& o) const noexcept {
-        return qfp_fadd(v, o.v);
+    sos_t operator+(auto x) const noexcept {
+        return qfp_fadd(v, x);
     }
 
     sos_t operator-(const sos_t& o) const noexcept {
         return qfp_fsub(v, o.v);
     }
 
-    sos_t operator*(const sos_t& o) const noexcept {
-        return qfp_fmul(v, o.v);
+    sos_t operator*(auto x) const noexcept {
+        return qfp_fmul(v, x);
     }
 
-    sos_t operator/(const sos_t& o) const noexcept {
-        return qfp_fdiv(v, o.v);
+    sos_t operator/(auto x) const noexcept {
+        return qfp_fdiv(v, x);
     }
 
     sos_t& operator+=(const sos_t& o) noexcept {
@@ -100,17 +102,14 @@ struct SOS_IIR_Filter {
   }
 
   void filter(auto samples, std::size_t n = N) {
-    for ([[maybe_unused]] auto _ : std::views::zip_transform(
-        [](auto samps, const auto& coeffs, auto& ww) {
-            // Assumes a0 and b0 coefficients are one (1.0)
-            for (auto& s : samps) {
-              auto f6 = s + coeffs.a1 * ww.w0 + coeffs.a2 * ww.w1;
-              s = f6 + coeffs.b1 * ww.w0 + coeffs.b2 * ww.w1;
-              ww.w1 = std::exchange(ww.w0, f6);
-            }
-            return 0;
-        },
-        std::views::repeat(samples, n), sos, w)) {}
+    for (auto [coeffs, ww] : std::views::zip(sos, w) | std::views::take(n)) {
+        // Assumes a0 and b0 coefficients are one (1.0)
+        for (auto& s : samples) {
+            auto f6 = s + coeffs.a1 * ww.w0 + coeffs.a2 * ww.w1;
+            s = f6 + coeffs.b1 * ww.w0 + coeffs.b2 * ww.w1;
+            ww.w1 = std::exchange(ww.w0, f6);
+        }
+    }
   }
 
   sos_t filter_sum_sqr(auto samples) {

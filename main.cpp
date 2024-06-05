@@ -9,9 +9,9 @@
 
 static constexpr auto& WEIGHTING       = A_weighting;
 static constexpr auto& MIC_EQUALIZER   = SPH0645LM4H_B_RB;
-static constexpr float MIC_OFFSET_DB   (  0.f); // Linear offset
-static constexpr float MIC_SENSITIVITY (-26.f); // dBFS value expected at MIC_REF_DB
-static constexpr float MIC_REF_DB      ( 94.f); // dB where sensitivity is specified
+static constexpr sos_t MIC_OFFSET_DB   (  0.f); // Linear offset
+static constexpr sos_t MIC_SENSITIVITY (-26.f); // dBFS value expected at MIC_REF_DB
+static constexpr sos_t MIC_REF_DB      ( 94.f); // dB where sensitivity is specified
 static constexpr sos_t MIC_OVERLOAD_DB (120.f); // dB - Acoustic overload point
 static constexpr sos_t MIC_NOISE_DB    ( 29.f); // dB - Noise floor
 static constexpr auto  MIC_BITS        = 18u;
@@ -21,8 +21,8 @@ static constexpr unsigned I2S_BUFSIZ = 1024;
 static constexpr unsigned I2S_STRIDE = 16;
 
 // Calculate reference amplitude value at compile time
-static const auto MIC_REF_AMPL = qfp_fpow(10.f, MIC_SENSITIVITY / 20) *
-    ((1 << (MIC_BITS - 1)) - 1);
+static const auto MIC_REF_AMPL = sos_t((1 << (MIC_BITS - 1)) - 1) *
+    qfp_fpow(10.f, MIC_SENSITIVITY / 20.f);
 
 static SEMAPHORE_DECL(i2sReady, 0);
 static THD_WORKING_AREA(waThread1, 128);
@@ -83,13 +83,13 @@ THD_FUNCTION(Thread1, arg)
         palSetPad(GPIOB, 7);
         chSemWait(&i2sReady);
 
-        const auto Leq_RMS = qfp_fsqrt((float)Leq_sum_sqr / Leq_samples);
-        const auto Leq_dB = MIC_OFFSET_DB + MIC_REF_DB + 20 *
+        const sos_t Leq_RMS = qfp_fsqrt(Leq_sum_sqr / qfp_uint2float(Leq_samples));
+        const sos_t Leq_dB = MIC_OFFSET_DB + MIC_REF_DB + sos_t(20.f) *
             qfp_flog10(Leq_RMS / MIC_REF_AMPL);
         Leq_sum_sqr = sos_t(0.f);
         Leq_samples = 0;
 
-        auto n = std::clamp(static_cast<int32_t>(Leq_dB), 0l, 999l);
+        auto n = std::clamp(qfp_float2int(Leq_dB), 0, 999);
         strbuf[2] = n % 10 + '0'; n /= 10;
         strbuf[1] = n % 10 + '0'; n /= 10;
         strbuf[0] = n ? n + '0' : ' ';
@@ -111,7 +111,7 @@ void i2sCallback(I2SDriver *i2s)
     std::ranges::copy(
         std::views::counted(i2sBuffer.begin() + offset, halfsize / I2S_STRIDE)
             | std::ranges::views::stride(2)
-            | std::views::transform([](uint32_t s) { return sos_t(fixsample(s)); }),
+            | std::views::transform([](uint32_t s) { return sos_t(qfp_int2float(fixsample(s))); }),
         samples);
     auto samps = std::views::counted(samples, halfsize / (2 * I2S_STRIDE));
 
