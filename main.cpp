@@ -15,10 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "hal.h"
-#include "ch.h"
 #include "sos-iir-filter.h"
 
 #include <algorithm>
+#include <atomic>
 #include <array>
 #include <cstring>
 #include <ranges>
@@ -40,13 +40,11 @@ static constexpr unsigned I2S_STRIDE = 16;
 static const auto MIC_REF_AMPL = sos_t((1 << (MIC_BITS - 1)) - 1) *
     qfp_fpow(10.f, MIC_SENSITIVITY / 20.f);
 
-static SEMAPHORE_DECL(i2sReady, 0);
-static THD_WORKING_AREA(waThread1, 128);
+static std::atomic_bool i2sReady;
 static std::array<uint32_t, I2S_BUFSIZ> i2sBuffer;
 static sos_t Leq_sum_sqr (0.f);
 static unsigned Leq_samples = 0;
 
-static THD_FUNCTION(Thread1, arg);
 static void i2sCallback(I2SDriver *i2s);
 
 static constexpr unsigned I2SPRval = 16'000'000 / SAMPLE_RATE / 32 / 2;
@@ -62,23 +60,35 @@ static constexpr I2SConfig i2sConfig = {
     /* I2SPR */     (I2SPRval / 2) | ((I2SPRval & 1) ? SPI_I2SPR_ODD : 0)
 };
 
-THD_TABLE_BEGIN
-  THD_TABLE_THREAD(0, "main",     waThread1,       Thread1,      NULL)
-THD_TABLE_END
+//static const halclkcfg_t halClockDefault = {
+//  .pwr_cr1              = PWR_CR1_VOS_0,
+//  .pwr_cr2              = STM32_PWR_CR2,
+//  .rcc_cr               = RCC_CR_PLLON | RCC_CR_HSION,
+//  .rcc_cfgr             = (6 << RCC_CFGR_PPRE_Pos) | (1 << RCC_CFGR_HPRE_Pos) | RCC_CFGR_SW_PLL,
+//  .rcc_pllcfgr          = (STM32_PLLR_VALUE << RCC_PLLCFGR_PLLR_Pos) | RCC_PLLCFGR_PLLREN |
+//                          (STM32_PLLN_VALUE << RCC_PLLCFGR_PLLN_Pos) |
+//                          ((STM32_PLLM_VALUE - 1) << RCC_PLLCFGR_PLLM_Pos) |
+//                          RCC_PLLCFGR_PLLSRC_HSI,
+//  .flash_acr            = FLASH_ACR_PRFTEN | FLASH_ACR_ICEN | (2 << FLASH_ACR_LATENCY_Pos)
+//};
+//
+//static const halclkcfg_t halClockSleep = {
+//  .pwr_cr1              = PWR_CR1_VOS_0,
+//  .pwr_cr2              = STM32_PWR_CR2,
+//  .rcc_cr               = RCC_CR_PLLON | RCC_CR_HSION,
+//  .rcc_cfgr             = (0 << RCC_CFGR_PPRE_Pos) | (10 << RCC_CFGR_HPRE_Pos) | RCC_CFGR_SW_PLL,
+//  .rcc_pllcfgr          = (STM32_PLLR_VALUE << RCC_PLLCFGR_PLLR_Pos) | RCC_PLLCFGR_PLLREN |
+//                          (STM32_PLLN_VALUE << RCC_PLLCFGR_PLLN_Pos) |
+//                          ((STM32_PLLM_VALUE - 1) << RCC_PLLCFGR_PLLM_Pos) |
+//                          RCC_PLLCFGR_PLLSRC_HSI,
+//  .flash_acr            = FLASH_ACR_PRFTEN | FLASH_ACR_ICEN | (2 << FLASH_ACR_LATENCY_Pos)
+//};
 
 int main(void)
 {
     halInit();
-    chSysInit();
-    for (;;)
-        asm("wfi");
-}
-
-THD_FUNCTION(Thread1, arg)
-{
-    (void)arg;
-  
-    chThdSleepMilliseconds(2000);
+    osalSysEnable();
+    osalThreadSleepMilliseconds(2000);
   
     palSetPadMode(GPIOB, 7, PAL_MODE_OUTPUT_PUSHPULL);
     palSetPadMode(GPIOF, 2, PAL_MODE_UNCONNECTED);
@@ -89,16 +99,28 @@ THD_FUNCTION(Thread1, arg)
   
     sdStart(&SD2, NULL);
     sdWrite(&SD2, (uint8_t *)"Noisemeter\n", 11);
-    chThdSleepMilliseconds(100);
+    osalThreadSleepMilliseconds(2);
   
     i2sStart(&I2SD1, &i2sConfig);
     i2sStartExchange(&I2SD1);
+
+    i2sReady.store(false);
   
     uint8_t strbuf[7] = { 0, 0, 0, 'd', 'B', '\n', '\0' };
     for (;;) {
-        palSetPad(GPIOB, 7);
-        chSemWait(&i2sReady);
+        //if (halClockSwitchMode(&halClockSleep)) {
+        //    sdWrite(&SD2, (uint8_t *)"sleepf\n", 7);
+        //    osalThreadSleepMilliseconds(5000);
+        //}
+        while (!i2sReady.load())
+            asm("wfi");
+        i2sReady.store(false);
+        //if (halClockSwitchMode(&halClockDefault)) {
+        //    sdWrite(&SD2, (uint8_t *)"sleepf\n", 7);
+        //    osalThreadSleepMilliseconds(5000);
+        //}
 
+        palSetPad(GPIOB, 7);
         const sos_t Leq_RMS = qfp_fsqrt(Leq_sum_sqr / qfp_uint2float(Leq_samples));
         const sos_t Leq_dB = MIC_OFFSET_DB + MIC_REF_DB + sos_t(20.f) *
             qfp_flog10(Leq_RMS / MIC_REF_AMPL);
@@ -110,24 +132,29 @@ THD_FUNCTION(Thread1, arg)
         strbuf[1] = n % 10 + '0'; n /= 10;
         strbuf[0] = n ? n + '0' : ' ';
         sdWrite(&SD2, strbuf, sizeof(strbuf));
+        osalThreadSleepMilliseconds(2);
         palClearPad(GPIOB, 7);
     }
 }
 
+__attribute__((section(".data")))
 int32_t fixsample(uint32_t s) {
     return (int32_t)(((s & 0xFFFF) << 16) | (s >> 16)) >> (32 - MIC_BITS);
 }
 
+__attribute__((section(".data")))
 void i2sCallback(I2SDriver *i2s)
 {
+    //halClockSwitchMode(&halClockDefault);
+
     palSetPad(GPIOB, 7);
     const auto halfsize = i2sBuffer.size() / 2;
-    const auto offset = i2sIsBufferComplete(i2s) ? halfsize : 0;
-    auto samples = reinterpret_cast<sos_t *>(i2sBuffer.data() + offset);
+    const auto source = i2sBuffer.data() + (i2sIsBufferComplete(i2s) ? halfsize : 0);
+    auto samples = reinterpret_cast<sos_t *>(source);
     std::ranges::copy(
-        std::views::counted(i2sBuffer.begin() + offset, halfsize / I2S_STRIDE)
+        std::views::counted(source, halfsize / I2S_STRIDE)
             | std::ranges::views::stride(2)
-            | std::views::transform([](uint32_t s) { return sos_t(qfp_int2float(fixsample(s))); }),
+            | std::views::transform([](uint32_t s) { return sos_t(qfp_int2float_asm(fixsample(s))); }),
         samples);
     auto samps = std::views::counted(samples, halfsize / (2 * I2S_STRIDE));
 
@@ -138,8 +165,10 @@ void i2sCallback(I2SDriver *i2s)
 
     // Wakeup main thread for dB calculation every second
     if (Leq_samples >= SAMPLE_RATE / I2S_STRIDE) {
-        chSemSignalI(&i2sReady);
+        i2sReady.store(true);
     }
     palClearPad(GPIOB, 7);
+
+    //halClockSwitchMode(&halClockSleep);
 }
 

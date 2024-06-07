@@ -5,7 +5,7 @@
 
 # Compiler options here.
 ifeq ($(USE_OPT),)
-  USE_OPT = -O3 -ggdb -fomit-frame-pointer -falign-functions=16 -fno-stack-protector
+  USE_OPT = -O3 -fomit-frame-pointer -falign-functions=16 -fno-stack-protector
 endif
 
 # C specific options here (added to USE_OPT).
@@ -102,10 +102,11 @@ include $(CHIBIOS)/os/common/startup/ARMCMx/compilers/GCC/mk/startup_stm32g0xx.m
 include $(CHIBIOS)/os/hal/hal.mk
 include $(CHIBIOS)/os/hal/ports/STM32/STM32G0xx/platform.mk
 #include $(CHIBIOS)/os/hal/boards/ST_NUCLEO64_G071RB/board.mk
-include $(CHIBIOS)/os/hal/osal/rt-nil/osal.mk
+#include $(CHIBIOS)/os/hal/osal/rt-nil/osal.mk
+include $(CHIBIOS)/os/hal/osal/os-less/ARMCMx/osal.mk
 # RTOS files (optional).
-include $(CHIBIOS)/os/nil/nil.mk
-include $(CHIBIOS)/os/common/ports/ARMv6-M/compilers/GCC/mk/port.mk
+#include $(CHIBIOS)/os/nil/nil.mk
+#include $(CHIBIOS)/os/common/ports/ARMv6-M/compilers/GCC/mk/port.mk
 ## Auto-build files in ./source recursively.
 #include $(CHIBIOS)/tools/mk/autobuild.mk
 ## Other files (optional).

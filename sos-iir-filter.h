@@ -28,17 +28,7 @@
 
 extern "C" {
 #include <qfplib-m0-full.h>
-}
-
-float qfp_fpow(float b, float e)
-{
-    return qfp_fexp(qfp_fmul(e, qfp_fln(b)));
-}
-
-float qfp_flog10(float x)
-{
-    static const auto ln10 = qfp_fln(10.f);
-    return qfp_fdiv(qfp_fln(x), ln10);
+#include "qfplib-port.h"
 }
 
 class sos_t
@@ -49,7 +39,7 @@ public:
     constexpr sos_t(float v_ = 0.f): v(v_) {}
 
     sos_t operator+(auto x) const noexcept {
-        return qfp_fadd(v, x);
+        return qfp_fadd_asm(v, x);
     }
 
     sos_t operator-(const sos_t& o) const noexcept {
@@ -57,7 +47,7 @@ public:
     }
 
     sos_t operator*(auto x) const noexcept {
-        return qfp_fmul(v, x);
+        return qfp_fmul_asm(v, x);
     }
 
     sos_t operator/(auto x) const noexcept {

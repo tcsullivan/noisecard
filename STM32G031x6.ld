@@ -27,7 +27,7 @@ MEMORY
     flash5 (rx) : org = 0x00000000, len = 0
     flash6 (rx) : org = 0x00000000, len = 0
     flash7 (rx) : org = 0x00000000, len = 0
-    ram0   (wx) : org = 0x20000000, len = 8k
+    ram0   (rwx) : org = 0x20000000, len = 8k
     ram1   (wx) : org = 0x00000000, len = 0
     ram2   (wx) : org = 0x00000000, len = 0
     ram3   (wx) : org = 0x00000000, len = 0
@@ -79,7 +79,7 @@ REGION_ALIAS("DATA_RAM_LMA", flash0);
 REGION_ALIAS("BSS_RAM", ram0);
 
 /* RAM region to be used for the default heap.*/
-REGION_ALIAS("HEAP_RAM", ram0);
+REGION_ALIAS("HEAP_RAM", ram1);
 
 /* Generic rules inclusion.*/
 INCLUDE rules.ld
