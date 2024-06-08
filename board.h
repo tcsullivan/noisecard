@@ -53,11 +53,9 @@
 /*
  * IO lines assignments.
  */
-//#define LINE_LED_GREEN              PAL_LINE(GPIOA, 12U)
-
-#define LINE_I2S_SD                 PAL_LINE(GPIOA, 12U) // or PB5
-#define LINE_I2S_WS                 PAL_LINE(GPIOB,  0U)
-#define LINE_I2S_CK                 PAL_LINE(GPIOA,  1U)
+#define LINE_I2S_SD                 PAL_LINE(GPIOA, 7U)
+#define LINE_I2S_WS                 PAL_LINE(GPIOA, 4U)
+#define LINE_I2S_CK                 PAL_LINE(GPIOA, 5U)
 
 #define LINE_USART2_TX              PAL_LINE(GPIOA, 14U)
 

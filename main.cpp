@@ -34,7 +34,7 @@ static constexpr auto  MIC_BITS        = 18u;
 static constexpr auto  SAMPLE_RATE     = 48000u;
 
 static constexpr unsigned I2S_BUFSIZ = 1024;
-static constexpr unsigned I2S_STRIDE = 16;
+static constexpr unsigned I2S_STRIDE = 32:
 
 // Calculate reference amplitude value at compile time
 static const auto MIC_REF_AMPL = sos_t((1 << (MIC_BITS - 1)) - 1) *
@@ -64,18 +64,19 @@ int main(void)
 {
     halInit();
     osalSysEnable();
-    osalThreadSleepMilliseconds(2000);
+    //osalThreadSleepMilliseconds(2000);
   
     palSetPadMode(GPIOB, 7, PAL_MODE_OUTPUT_PUSHPULL);
-    palSetPadMode(GPIOF, 2, PAL_MODE_UNCONNECTED);
+    palSetPad(GPIOB, 7);
+    //palSetPadMode(GPIOF, 2, PAL_MODE_UNCONNECTED);
     palSetLineMode(LINE_I2S_SD, PAL_MODE_ALTERNATE(0));
     palSetLineMode(LINE_I2S_WS, PAL_MODE_ALTERNATE(0));
     palSetLineMode(LINE_I2S_CK, PAL_MODE_ALTERNATE(0));
-    palSetLineMode(LINE_USART2_TX, PAL_MODE_ALTERNATE(1));
+    //palSetLineMode(LINE_USART2_TX, PAL_MODE_ALTERNATE(1));
   
-    sdStart(&SD2, NULL);
-    sdWrite(&SD2, (uint8_t *)"Noisemeter\n", 11);
-    osalThreadSleepMilliseconds(2);
+    //sdStart(&SD2, NULL);
+    //sdWrite(&SD2, (uint8_t *)"Noisemeter\n", 11);
+    //osalThreadSleepMilliseconds(2);
   
     i2sStart(&I2SD1, &i2sConfig);
     i2sStartExchange(&I2SD1);
@@ -86,7 +87,7 @@ int main(void)
         SCB->SCR |= SCB_SCR_SLEEPONEXIT_Msk;
         __WFI();
 
-        palSetPad(GPIOB, 7);
+        //palSetPad(GPIOB, 7);
         const sos_t Leq_RMS = qfp_fsqrt(Leq_sum_sqr / qfp_uint2float(Leq_samples));
         const sos_t Leq_dB = MIC_OFFSET_DB + MIC_REF_DB + sos_t(20.f) *
             qfp_flog10(Leq_RMS / MIC_REF_AMPL);
@@ -94,12 +95,15 @@ int main(void)
         Leq_samples = 0;
 
         auto n = std::clamp(qfp_float2int(Leq_dB), 0, 999);
-        strbuf[2] = n % 10 + '0'; n /= 10;
-        strbuf[1] = n % 10 + '0'; n /= 10;
-        strbuf[0] = n ? n + '0' : ' ';
-        sdWrite(&SD2, strbuf, sizeof(strbuf));
-        osalThreadSleepMilliseconds(2);
         palClearPad(GPIOB, 7);
+        osalThreadSleepMicroseconds(200);
+        palSetPad(GPIOB, 7);
+        //strbuf[2] = n % 10 + '0'; n /= 10;
+        //strbuf[1] = n % 10 + '0'; n /= 10;
+        //strbuf[0] = n ? n + '0' : ' ';
+        //sdWrite(&SD2, strbuf, sizeof(strbuf));
+        //osalThreadSleepMilliseconds(2);
+        ////palClearPad(GPIOB, 7);
     }
 }
 
@@ -114,7 +118,7 @@ void i2sCallback(I2SDriver *i2s)
     if (i2sReady.load())
         return;
 
-    palSetPad(GPIOB, 7);
+    //palSetPad(GPIOB, 7);
     const auto halfsize = i2sBuffer.size() / 2;
     const auto source = i2sBuffer.data() + (i2sIsBufferComplete(i2s) ? halfsize : 0);
     auto samples = reinterpret_cast<sos_t *>(source);
@@ -135,6 +139,6 @@ void i2sCallback(I2SDriver *i2s)
         i2sReady.store(true);
         SCB->SCR &= ~SCB_SCR_SLEEPONEXIT_Msk;
     }
-    palClearPad(GPIOB, 7);
+    //palClearPad(GPIOB, 7);
 }
 
