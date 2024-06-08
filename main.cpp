@@ -60,30 +60,6 @@ static constexpr I2SConfig i2sConfig = {
     /* I2SPR */     (I2SPRval / 2) | ((I2SPRval & 1) ? SPI_I2SPR_ODD : 0)
 };
 
-//static const halclkcfg_t halClockDefault = {
-//  .pwr_cr1              = PWR_CR1_VOS_0,
-//  .pwr_cr2              = STM32_PWR_CR2,
-//  .rcc_cr               = RCC_CR_PLLON | RCC_CR_HSION,
-//  .rcc_cfgr             = (6 << RCC_CFGR_PPRE_Pos) | (1 << RCC_CFGR_HPRE_Pos) | RCC_CFGR_SW_PLL,
-//  .rcc_pllcfgr          = (STM32_PLLR_VALUE << RCC_PLLCFGR_PLLR_Pos) | RCC_PLLCFGR_PLLREN |
-//                          (STM32_PLLN_VALUE << RCC_PLLCFGR_PLLN_Pos) |
-//                          ((STM32_PLLM_VALUE - 1) << RCC_PLLCFGR_PLLM_Pos) |
-//                          RCC_PLLCFGR_PLLSRC_HSI,
-//  .flash_acr            = FLASH_ACR_PRFTEN | FLASH_ACR_ICEN | (2 << FLASH_ACR_LATENCY_Pos)
-//};
-//
-//static const halclkcfg_t halClockSleep = {
-//  .pwr_cr1              = PWR_CR1_VOS_0,
-//  .pwr_cr2              = STM32_PWR_CR2,
-//  .rcc_cr               = RCC_CR_PLLON | RCC_CR_HSION,
-//  .rcc_cfgr             = (0 << RCC_CFGR_PPRE_Pos) | (10 << RCC_CFGR_HPRE_Pos) | RCC_CFGR_SW_PLL,
-//  .rcc_pllcfgr          = (STM32_PLLR_VALUE << RCC_PLLCFGR_PLLR_Pos) | RCC_PLLCFGR_PLLREN |
-//                          (STM32_PLLN_VALUE << RCC_PLLCFGR_PLLN_Pos) |
-//                          ((STM32_PLLM_VALUE - 1) << RCC_PLLCFGR_PLLM_Pos) |
-//                          RCC_PLLCFGR_PLLSRC_HSI,
-//  .flash_acr            = FLASH_ACR_PRFTEN | FLASH_ACR_ICEN | (2 << FLASH_ACR_LATENCY_Pos)
-//};
-
 int main(void)
 {
     halInit();
@@ -104,21 +80,11 @@ int main(void)
     i2sStart(&I2SD1, &i2sConfig);
     i2sStartExchange(&I2SD1);
 
-    i2sReady.store(false);
-  
     uint8_t strbuf[7] = { 0, 0, 0, 'd', 'B', '\n', '\0' };
     for (;;) {
-        //if (halClockSwitchMode(&halClockSleep)) {
-        //    sdWrite(&SD2, (uint8_t *)"sleepf\n", 7);
-        //    osalThreadSleepMilliseconds(5000);
-        //}
-        while (!i2sReady.load())
-            asm("wfi");
         i2sReady.store(false);
-        //if (halClockSwitchMode(&halClockDefault)) {
-        //    sdWrite(&SD2, (uint8_t *)"sleepf\n", 7);
-        //    osalThreadSleepMilliseconds(5000);
-        //}
+        SCB->SCR |= SCB_SCR_SLEEPONEXIT_Msk;
+        __WFI();
 
         palSetPad(GPIOB, 7);
         const sos_t Leq_RMS = qfp_fsqrt(Leq_sum_sqr / qfp_uint2float(Leq_samples));
@@ -145,7 +111,8 @@ int32_t fixsample(uint32_t s) {
 __attribute__((section(".data")))
 void i2sCallback(I2SDriver *i2s)
 {
-    //halClockSwitchMode(&halClockDefault);
+    if (i2sReady.load())
+        return;
 
     palSetPad(GPIOB, 7);
     const auto halfsize = i2sBuffer.size() / 2;
@@ -166,9 +133,8 @@ void i2sCallback(I2SDriver *i2s)
     // Wakeup main thread for dB calculation every second
     if (Leq_samples >= SAMPLE_RATE / I2S_STRIDE) {
         i2sReady.store(true);
+        SCB->SCR &= ~SCB_SCR_SLEEPONEXIT_Msk;
     }
     palClearPad(GPIOB, 7);
-
-    //halClockSwitchMode(&halClockSleep);
 }
 

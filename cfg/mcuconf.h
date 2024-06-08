@@ -42,7 +42,7 @@
 #define STM32_CLOCK_DYNAMIC                 FALSE
 #define STM32_VOS                           STM32_VOS_RANGE2
 #define STM32_PWR_CR2                       (STM32_PVDRT_LEV0 | STM32_PVDFT_LEV0 | STM32_PVDE_DISABLED)
-#define STM32_PWR_CR3                       (PWR_CR3_EIWUL)
+#define STM32_PWR_CR3                       (PWR_CR3_EIWUL | PWR_CR3_ENB_ULP)
 #define STM32_PWR_CR4                       (0U)
 #define STM32_PWR_PUCRA                     (0U)
 #define STM32_PWR_PDCRA                     (0U)
@@ -63,8 +63,8 @@
 #define STM32_PLLSRC                        STM32_PLLSRC_NOCLOCK
 #define STM32_PLLM_VALUE                    2
 #define STM32_PLLN_VALUE                    8
-#define STM32_PLLP_VALUE                    4
-#define STM32_PLLQ_VALUE                    4
+#define STM32_PLLP_VALUE                    32
+#define STM32_PLLQ_VALUE                    8
 #define STM32_PLLR_VALUE                    4
 #define STM32_HPRE                          STM32_HPRE_DIV1
 #define STM32_PPRE                          STM32_PPRE_DIV4
@@ -206,7 +206,7 @@
  * ST driver system settings.
  */
 #define STM32_ST_IRQ_PRIORITY               2
-#define STM32_ST_USE_TIMER                  2
+#define STM32_ST_USE_TIMER                  17
 
 /*
  * TRNG driver system settings.

@@ -29,7 +29,7 @@
  * @brief   Frequency in Hertz of the system tick.
  */
 #if !defined(OSAL_ST_FREQUENCY) || defined(__DOXYGEN__)
-#define OSAL_ST_FREQUENCY                   20
+#define OSAL_ST_FREQUENCY                   1000
 #endif
 
 /**
