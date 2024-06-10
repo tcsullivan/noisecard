@@ -34,7 +34,7 @@ static constexpr auto  MIC_BITS        = 18u;
 static constexpr auto  SAMPLE_RATE     = 48000u;
 
 static constexpr unsigned I2S_BUFSIZ = 1024;
-static constexpr unsigned I2S_STRIDE = 32;
+static constexpr unsigned I2S_USESIZ = 16;
 
 // Calculate reference amplitude value at compile time
 static const auto MIC_REF_AMPL = sos_t((1 << (MIC_BITS - 1)) - 1) *
@@ -152,19 +152,19 @@ void i2sCallback(I2SDriver *i2s)
     const auto source = i2sBuffer.data() + (i2sIsBufferComplete(i2s) ? halfsize : 0);
     auto samples = reinterpret_cast<sos_t *>(source);
     std::ranges::copy(
-        std::views::counted(source, halfsize / I2S_STRIDE)
+        std::views::counted(source, I2S_USESIZ * 2)
             | std::ranges::views::stride(2)
             | std::views::transform([](uint32_t s) { return sos_t(qfp_int2float_asm(fixsample(s))); }),
         samples);
-    auto samps = std::views::counted(samples, halfsize / (2 * I2S_STRIDE));
+    auto samps = std::views::counted(samples, I2S_USESIZ);
 
     // Accumulate Leq sum
     MIC_EQUALIZER.filter(samps);
     Leq_sum_sqr += WEIGHTING.filter_sum_sqr(samps);
-    Leq_samples += samps.size();
+    Leq_samples += halfsize / 2;
 
     // Wakeup main thread for dB calculation every half second
-    if (Leq_samples >= SAMPLE_RATE / I2S_STRIDE / 2) {
+    if (Leq_samples >= SAMPLE_RATE / 2) {
         i2sReady.store(true);
         SCB->SCR &= ~SCB_SCR_SLEEPONEXIT_Msk;
     }
