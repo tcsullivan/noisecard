@@ -57,7 +57,7 @@
 #define LINE_I2S_WS                 PAL_LINE(GPIOA, 4U)
 #define LINE_I2S_CK                 PAL_LINE(GPIOA, 5U)
 
-#define LINE_USART2_TX              PAL_LINE(GPIOA, 14U)
+#define LINE_TP1                    PAL_LINE(GPIOA, 12U)
 
 #define LINE_LED0                   PAL_LINE(GPIOB, 7U)
 #define LINE_LED1                   PAL_LINE(GPIOC, 14U)

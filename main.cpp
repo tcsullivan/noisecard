@@ -66,20 +66,6 @@ int main(void)
     halInit();
     osalSysEnable();
   
-    palSetLineMode(LINE_LED0, PAL_MODE_OUTPUT_PUSHPULL); palSetLine(LINE_LED0);
-    palSetLineMode(LINE_LED1, PAL_MODE_OUTPUT_PUSHPULL); palSetLine(LINE_LED1);
-    palSetLineMode(LINE_LED2, PAL_MODE_OUTPUT_PUSHPULL); palSetLine(LINE_LED2);
-    palSetLineMode(LINE_LED3, PAL_MODE_OUTPUT_PUSHPULL); palSetLine(LINE_LED3);
-    palSetLineMode(LINE_LED4, PAL_MODE_OUTPUT_PUSHPULL); palSetLine(LINE_LED4);
-    palSetLineMode(LINE_LED5, PAL_MODE_OUTPUT_PUSHPULL); palSetLine(LINE_LED5);
-    palSetLineMode(LINE_LED6, PAL_MODE_OUTPUT_PUSHPULL); palSetLine(LINE_LED6);
-    palSetLineMode(LINE_LED7, PAL_MODE_OUTPUT_PUSHPULL); palSetLine(LINE_LED7);
-    palSetLineMode(LINE_LED8, PAL_MODE_OUTPUT_PUSHPULL); palSetLine(LINE_LED8);
-    palSetLineMode(LINE_LED9, PAL_MODE_OUTPUT_PUSHPULL); palSetLine(LINE_LED9);
-    palSetLineMode(LINE_I2S_SD, PAL_MODE_ALTERNATE(0));
-    palSetLineMode(LINE_I2S_WS, PAL_MODE_ALTERNATE(0));
-    palSetLineMode(LINE_I2S_CK, PAL_MODE_ALTERNATE(0));
-  
     i2sReady.store(true);
     i2sStart(&I2SD1, &i2sConfig);
     i2sStartExchange(&I2SD1);
@@ -95,7 +81,9 @@ int main(void)
     for (;;) {
         i2sReady.store(false);
         SCB->SCR |= SCB_SCR_SLEEPONEXIT_Msk;
+        //palClearLine(LINE_TP1);
         __WFI();
+        //palSetLine(LINE_TP1);
 
         const auto sum_sqr = std::exchange(Leq_sum_sqr, sos_t(0.f));
         const auto count = std::exchange(Leq_samples, 0);
@@ -148,6 +136,8 @@ void i2sCallback(I2SDriver *i2s)
     if (i2sReady.load())
         return;
 
+    //palSetLine(LINE_TP1);
+
     const auto halfsize = i2sBuffer.size() / 2;
     const auto source = i2sBuffer.data() + (i2sIsBufferComplete(i2s) ? halfsize : 0);
     auto samples = reinterpret_cast<sos_t *>(source);
@@ -168,5 +158,7 @@ void i2sCallback(I2SDriver *i2s)
         i2sReady.store(true);
         SCB->SCR &= ~SCB_SCR_SLEEPONEXIT_Msk;
     }
+
+    //palClearLine(LINE_TP1);
 }
 
