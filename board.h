@@ -59,6 +59,17 @@
 
 #define LINE_USART2_TX              PAL_LINE(GPIOA, 14U)
 
+#define LINE_LED0                   PAL_LINE(GPIOB, 7U)
+#define LINE_LED1                   PAL_LINE(GPIOC, 14U)
+#define LINE_LED2                   PAL_LINE(GPIOC, 15U)
+#define LINE_LED3                   PAL_LINE(GPIOA, 0U)
+#define LINE_LED4                   PAL_LINE(GPIOA, 1U)
+#define LINE_LED5                   PAL_LINE(GPIOA, 2U)
+#define LINE_LED6                   PAL_LINE(GPIOA, 3U)
+#define LINE_LED7                   PAL_LINE(GPIOA, 6U)
+#define LINE_LED8                   PAL_LINE(GPIOB, 0U)
+#define LINE_LED9                   PAL_LINE(GPIOB, 3U)
+
 /*
  * I/O ports initial setup, this configuration is established soon after reset
  * in the initialization code.

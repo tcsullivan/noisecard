@@ -34,7 +34,7 @@ static constexpr auto  MIC_BITS        = 18u;
 static constexpr auto  SAMPLE_RATE     = 48000u;
 
 static constexpr unsigned I2S_BUFSIZ = 1024;
-static constexpr unsigned I2S_STRIDE = 32:
+static constexpr unsigned I2S_STRIDE = 32;
 
 // Calculate reference amplitude value at compile time
 static const auto MIC_REF_AMPL = sos_t((1 << (MIC_BITS - 1)) - 1) *
@@ -45,6 +45,7 @@ static std::array<uint32_t, I2S_BUFSIZ> i2sBuffer;
 static sos_t Leq_sum_sqr (0.f);
 static unsigned Leq_samples = 0;
 
+static void blinkDb(int db);
 static void i2sCallback(I2SDriver *i2s);
 
 static constexpr unsigned I2SPRval = 16'000'000 / SAMPLE_RATE / 32 / 2;
@@ -64,47 +65,76 @@ int main(void)
 {
     halInit();
     osalSysEnable();
-    //osalThreadSleepMilliseconds(2000);
   
-    palSetPadMode(GPIOB, 7, PAL_MODE_OUTPUT_PUSHPULL);
-    palSetPad(GPIOB, 7);
-    //palSetPadMode(GPIOF, 2, PAL_MODE_UNCONNECTED);
+    palSetLineMode(LINE_LED0, PAL_MODE_OUTPUT_PUSHPULL); palSetLine(LINE_LED0);
+    palSetLineMode(LINE_LED1, PAL_MODE_OUTPUT_PUSHPULL); palSetLine(LINE_LED1);
+    palSetLineMode(LINE_LED2, PAL_MODE_OUTPUT_PUSHPULL); palSetLine(LINE_LED2);
+    palSetLineMode(LINE_LED3, PAL_MODE_OUTPUT_PUSHPULL); palSetLine(LINE_LED3);
+    palSetLineMode(LINE_LED4, PAL_MODE_OUTPUT_PUSHPULL); palSetLine(LINE_LED4);
+    palSetLineMode(LINE_LED5, PAL_MODE_OUTPUT_PUSHPULL); palSetLine(LINE_LED5);
+    palSetLineMode(LINE_LED6, PAL_MODE_OUTPUT_PUSHPULL); palSetLine(LINE_LED6);
+    palSetLineMode(LINE_LED7, PAL_MODE_OUTPUT_PUSHPULL); palSetLine(LINE_LED7);
+    palSetLineMode(LINE_LED8, PAL_MODE_OUTPUT_PUSHPULL); palSetLine(LINE_LED8);
+    palSetLineMode(LINE_LED9, PAL_MODE_OUTPUT_PUSHPULL); palSetLine(LINE_LED9);
     palSetLineMode(LINE_I2S_SD, PAL_MODE_ALTERNATE(0));
     palSetLineMode(LINE_I2S_WS, PAL_MODE_ALTERNATE(0));
     palSetLineMode(LINE_I2S_CK, PAL_MODE_ALTERNATE(0));
-    //palSetLineMode(LINE_USART2_TX, PAL_MODE_ALTERNATE(1));
   
-    //sdStart(&SD2, NULL);
-    //sdWrite(&SD2, (uint8_t *)"Noisemeter\n", 11);
-    //osalThreadSleepMilliseconds(2);
-  
+    i2sReady.store(true);
     i2sStart(&I2SD1, &i2sConfig);
     i2sStartExchange(&I2SD1);
+    // Microphone warmup time
+    osalThreadSleepMilliseconds(140);
+    // Reach filter delay steady state
+    i2sReady.store(false);
+    osalThreadSleepMilliseconds(120);
+    // Discard initial readings
+    Leq_sum_sqr = 0.f;
+    Leq_samples = 0;
 
-    uint8_t strbuf[7] = { 0, 0, 0, 'd', 'B', '\n', '\0' };
     for (;;) {
         i2sReady.store(false);
         SCB->SCR |= SCB_SCR_SLEEPONEXIT_Msk;
         __WFI();
 
-        //palSetPad(GPIOB, 7);
-        const sos_t Leq_RMS = qfp_fsqrt(Leq_sum_sqr / qfp_uint2float(Leq_samples));
+        const auto sum_sqr = std::exchange(Leq_sum_sqr, sos_t(0.f));
+        const auto count = std::exchange(Leq_samples, 0);
+        const sos_t Leq_RMS = qfp_fsqrt(sum_sqr / qfp_uint2float(count));
         const sos_t Leq_dB = MIC_OFFSET_DB + MIC_REF_DB + sos_t(20.f) *
             qfp_flog10(Leq_RMS / MIC_REF_AMPL);
-        Leq_sum_sqr = sos_t(0.f);
-        Leq_samples = 0;
-
-        auto n = std::clamp(qfp_float2int(Leq_dB), 0, 999);
-        palClearPad(GPIOB, 7);
-        osalThreadSleepMicroseconds(200);
-        palSetPad(GPIOB, 7);
-        //strbuf[2] = n % 10 + '0'; n /= 10;
-        //strbuf[1] = n % 10 + '0'; n /= 10;
-        //strbuf[0] = n ? n + '0' : ' ';
-        //sdWrite(&SD2, strbuf, sizeof(strbuf));
-        //osalThreadSleepMilliseconds(2);
-        ////palClearPad(GPIOB, 7);
+        const auto n = std::clamp(qfp_float2int(Leq_dB), 0, 999);
+        blinkDb(n);
     }
+}
+
+void blinkDb(int db)
+{
+    auto line = LINE_LED0;
+
+    if (db < 45)
+        line = LINE_LED0;
+    else if (db < 55)
+        line = LINE_LED1;
+    else if (db < 65)
+        line = LINE_LED2;
+    else if (db < 75)
+        line = LINE_LED3;
+    else if (db < 82)
+        line = LINE_LED4;
+    else if (db < 87)
+        line = LINE_LED5;
+    else if (db < 92)
+        line = LINE_LED6;
+    else if (db < 97)
+        line = LINE_LED7;
+    else if (db < 102)
+        line = LINE_LED8;
+    else
+        line = LINE_LED9;
+
+    palClearLine(line);
+    osalThreadSleepMilliseconds(50);
+    palSetLine(line);
 }
 
 __attribute__((section(".data")))
@@ -118,7 +148,6 @@ void i2sCallback(I2SDriver *i2s)
     if (i2sReady.load())
         return;
 
-    //palSetPad(GPIOB, 7);
     const auto halfsize = i2sBuffer.size() / 2;
     const auto source = i2sBuffer.data() + (i2sIsBufferComplete(i2s) ? halfsize : 0);
     auto samples = reinterpret_cast<sos_t *>(source);
@@ -134,11 +163,10 @@ void i2sCallback(I2SDriver *i2s)
     Leq_sum_sqr += WEIGHTING.filter_sum_sqr(samps);
     Leq_samples += samps.size();
 
-    // Wakeup main thread for dB calculation every second
-    if (Leq_samples >= SAMPLE_RATE / I2S_STRIDE) {
+    // Wakeup main thread for dB calculation every half second
+    if (Leq_samples >= SAMPLE_RATE / I2S_STRIDE / 2) {
         i2sReady.store(true);
         SCB->SCR &= ~SCB_SCR_SLEEPONEXIT_Msk;
     }
-    //palClearPad(GPIOB, 7);
 }
 
