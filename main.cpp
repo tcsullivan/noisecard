@@ -121,7 +121,7 @@ void blinkDb(int db)
         line = LINE_LED9;
 
     palClearLine(line);
-    osalThreadSleepMilliseconds(50);
+    osalThreadSleepMilliseconds(100);
     palSetLine(line);
 }
 
