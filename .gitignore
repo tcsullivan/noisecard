@@ -3,4 +3,6 @@
 *.pretty
 *.step
 build
+hardware/fp-info-cache
+hardware/noisecard-backups
 hardware/production

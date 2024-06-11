@@ -1876,7 +1876,7 @@
     (property "Reference" "C3" (at 73.66 32.766 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Value" "330u" (at 73.66 35.306 0)
+    (property "Value" "330uF" (at 73.66 35.306 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Footprint" "Capacitor_Tantalum_SMD:CP_EIA-7343-15_Kemet-W" (at 71.4502 38.735 0)
@@ -1971,8 +1971,8 @@
     (property "Part Number" "APTD1608LSURCK" (at 214.63 102.87 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "2" (uuid 455ac6a2-863b-43b8-9272-a864429f15f4))
-    (pin "1" (uuid d1a0fde7-e9af-40b6-a11b-543a47a2f89d))
+    (pin "2" (uuid 455ac6a2-863b-43b8-9272-a864429f15f5))
+    (pin "1" (uuid d1a0fde7-e9af-40b6-a11b-543a47a2f89e))
     (instances
       (project "noisecard"
         (path "/2019f223-1307-408a-bf87-dad398f72c59"
@@ -2000,8 +2000,8 @@
     (property "Part Number" "APTD1608LSURCK" (at 214.63 115.57 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "2" (uuid 455ac6a2-863b-43b8-9272-a864429f15f4))
-    (pin "1" (uuid d1a0fde7-e9af-40b6-a11b-543a47a2f89d))
+    (pin "2" (uuid 455ac6a2-863b-43b8-9272-a864429f15f6))
+    (pin "1" (uuid d1a0fde7-e9af-40b6-a11b-543a47a2f89f))
     (instances
       (project "noisecard"
         (path "/2019f223-1307-408a-bf87-dad398f72c59"
@@ -2029,8 +2029,8 @@
     (property "Part Number" "APTD1608LSURCK" (at 214.63 96.52 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "2" (uuid 455ac6a2-863b-43b8-9272-a864429f15f4))
-    (pin "1" (uuid d1a0fde7-e9af-40b6-a11b-543a47a2f89d))
+    (pin "2" (uuid 455ac6a2-863b-43b8-9272-a864429f15f7))
+    (pin "1" (uuid d1a0fde7-e9af-40b6-a11b-543a47a2f8a0))
     (instances
       (project "noisecard"
         (path "/2019f223-1307-408a-bf87-dad398f72c59"
@@ -2104,7 +2104,7 @@
     (property "Reference" "C8" (at 50.165 114.9413 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
-    (property "Value" "2U2" (at 50.165 117.4813 0)
+    (property "Value" "2.2uF" (at 50.165 117.4813 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 53.34 115.57 0)
@@ -2183,7 +2183,7 @@
     (property "Reference" "C9" (at 61.595 114.9413 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
-    (property "Value" "0.1U" (at 61.595 117.4813 0)
+    (property "Value" "0.1uF" (at 61.595 117.4813 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Footprint" "Capacitor_SMD:C_0603_1608Metric" (at 58.42 115.57 0)
@@ -2212,7 +2212,7 @@
     (property "Reference" "C1" (at 102.87 33.655 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Value" "4u7" (at 102.87 36.195 0)
+    (property "Value" "4.7uF" (at 102.87 36.195 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 100.0252 38.735 0)
@@ -2253,8 +2253,8 @@
     (property "Part Number" "APTD1608LSURCK" (at 214.63 121.92 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "2" (uuid 455ac6a2-863b-43b8-9272-a864429f15f4))
-    (pin "1" (uuid d1a0fde7-e9af-40b6-a11b-543a47a2f89d))
+    (pin "2" (uuid 455ac6a2-863b-43b8-9272-a864429f15f8))
+    (pin "1" (uuid d1a0fde7-e9af-40b6-a11b-543a47a2f8a1))
     (instances
       (project "noisecard"
         (path "/2019f223-1307-408a-bf87-dad398f72c59"
@@ -2346,7 +2346,7 @@
     (property "Reference" "C2" (at 148.59 33.655 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Value" "10u" (at 148.59 36.195 0)
+    (property "Value" "10uF" (at 148.59 36.195 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 146.3802 38.735 0)
@@ -2387,8 +2387,8 @@
     (property "Part Number" "APTD1608LSURCK" (at 214.63 128.27 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "2" (uuid 455ac6a2-863b-43b8-9272-a864429f15f4))
-    (pin "1" (uuid d1a0fde7-e9af-40b6-a11b-543a47a2f89d))
+    (pin "2" (uuid 455ac6a2-863b-43b8-9272-a864429f15f9))
+    (pin "1" (uuid d1a0fde7-e9af-40b6-a11b-543a47a2f8a2))
     (instances
       (project "noisecard"
         (path "/2019f223-1307-408a-bf87-dad398f72c59"
@@ -2442,10 +2442,10 @@
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid bd037501-f2bd-4716-a242-b9d25cf98220))
-    (pin "6" (uuid 3278223c-3fa9-40df-bb18-ef628deff05e))
+    (pin "6" (uuid 3278223c-3fa9-40df-bb18-ef628deff05f))
     (pin "3" (uuid 11f70334-c848-47e5-a24d-625d53901c27))
-    (pin "4" (uuid d24118b6-8fda-400d-b722-8d6333a5a013))
-    (pin "5" (uuid 175b6856-006f-44d2-9833-9acdf94689ee))
+    (pin "4" (uuid d24118b6-8fda-400d-b722-8d6333a5a014))
+    (pin "5" (uuid 175b6856-006f-44d2-9833-9acdf94689ef))
     (pin "2" (uuid ce0b9538-62de-4592-920a-f74542d66135))
     (instances
       (project "noisecard"
@@ -2819,8 +2819,8 @@
     (property "Part Number" "APTD1608LSURCK" (at 214.63 147.32 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "2" (uuid 455ac6a2-863b-43b8-9272-a864429f15f4))
-    (pin "1" (uuid d1a0fde7-e9af-40b6-a11b-543a47a2f89d))
+    (pin "2" (uuid 455ac6a2-863b-43b8-9272-a864429f15fa))
+    (pin "1" (uuid d1a0fde7-e9af-40b6-a11b-543a47a2f8a3))
     (instances
       (project "noisecard"
         (path "/2019f223-1307-408a-bf87-dad398f72c59"
@@ -2836,7 +2836,7 @@
     (property "Reference" "C4" (at 88.9 32.766 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Value" "330u" (at 88.9 35.306 0)
+    (property "Value" "330uF" (at 88.9 35.306 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Footprint" "Capacitor_Tantalum_SMD:CP_EIA-7343-15_Kemet-W" (at 86.0552 38.735 0)
@@ -2915,7 +2915,7 @@
     (property "Reference" "L1" (at 135.255 24.765 90)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Value" "10u" (at 135.255 27.305 90)
+    (property "Value" "10uH" (at 135.255 27.305 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Footprint" "Inductor_SMD:L_0805_2012Metric" (at 135.255 29.845 0)
@@ -2956,8 +2956,8 @@
     (property "Part Number" "APTD1608LSURCK" (at 214.63 153.67 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "2" (uuid 455ac6a2-863b-43b8-9272-a864429f15f4))
-    (pin "1" (uuid d1a0fde7-e9af-40b6-a11b-543a47a2f89d))
+    (pin "2" (uuid 455ac6a2-863b-43b8-9272-a864429f15fb))
+    (pin "1" (uuid d1a0fde7-e9af-40b6-a11b-543a47a2f8a4))
     (instances
       (project "noisecard"
         (path "/2019f223-1307-408a-bf87-dad398f72c59"
@@ -2973,7 +2973,7 @@
     (property "Reference" "C6" (at 245.11 38.7413 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
-    (property "Value" "0.1U" (at 245.11 41.2813 0)
+    (property "Value" "0.1uF" (at 245.11 41.2813 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Footprint" "Capacitor_SMD:C_0603_1608Metric" (at 241.935 39.37 0)
@@ -3027,7 +3027,7 @@
     (property "Reference" "C5" (at 66.675 90.1763 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
-    (property "Value" "0.1U" (at 66.675 92.7163 0)
+    (property "Value" "0.1uF" (at 66.675 92.7163 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Footprint" "Capacitor_SMD:C_0603_1608Metric" (at 63.5 90.805 0)
@@ -3209,8 +3209,8 @@
     (property "Part Number" "APTD1608LSURCK" (at 214.63 140.97 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "2" (uuid 455ac6a2-863b-43b8-9272-a864429f15f4))
-    (pin "1" (uuid d1a0fde7-e9af-40b6-a11b-543a47a2f89d))
+    (pin "2" (uuid 455ac6a2-863b-43b8-9272-a864429f15fc))
+    (pin "1" (uuid d1a0fde7-e9af-40b6-a11b-543a47a2f8a5))
     (instances
       (project "noisecard"
         (path "/2019f223-1307-408a-bf87-dad398f72c59"
@@ -3226,7 +3226,7 @@
     (property "Reference" "C7" (at 254 38.7413 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
-    (property "Value" "200P" (at 254 41.2813 0)
+    (property "Value" "200pF" (at 254 41.2813 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Footprint" "Capacitor_SMD:C_0603_1608Metric" (at 250.825 39.37 0)
@@ -3341,8 +3341,8 @@
     (property "Part Number" "APTD1608LSURCK" (at 214.63 109.22 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "2" (uuid 455ac6a2-863b-43b8-9272-a864429f15f4))
-    (pin "1" (uuid d1a0fde7-e9af-40b6-a11b-543a47a2f89d))
+    (pin "2" (uuid 455ac6a2-863b-43b8-9272-a864429f15fd))
+    (pin "1" (uuid d1a0fde7-e9af-40b6-a11b-543a47a2f8a6))
     (instances
       (project "noisecard"
         (path "/2019f223-1307-408a-bf87-dad398f72c59"
