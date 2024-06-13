@@ -16,6 +16,14 @@ You need:
 
 Extract ChibiOS to a folder, edit the `Makefile` so CHIBIOS points to that folder, then run `make`.
 
+### Flashing the card
+
+You'll need a 6-pin Tag-Connect cable (e.g. [TC2030-CTX-NL](https://www.tag-connect.com/product/tc2030-ctx-nl-6-pin-no-legs-cable-with-10-pin-micro-connector-for-cortex-processors)), compatible programmer, and OpenOCD. Power up the card and run the following command (using the appropriate interface scripts for your programmer):
+
+```
+openocd -f interface/ftdi/olimex-arm-usb-ocd-h.cfg -f interface/ftdi/olimex-arm-jtag-swd.cfg -f target/stm32g0x.cfg -c "program build/ch.hex verify reset exit"
+```
+
 ## Credits
 
 * [ESP32-I2S-SLM](https://hackaday.io/project/166867-esp32-i2s-slm) for a starting point with accurate decibel-measuring code.
